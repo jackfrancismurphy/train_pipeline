@@ -1,0 +1,9 @@
+*
+!.gitignore
+!README.md
+!LICENCE.txt
+!requirements.txt
+!main.py
+!/util
+!/util/td.py
+!/util/trust.py
