@@ -1,6 +1,7 @@
 from quixstreams import Application
 from quixstreams.kafka.configuration import ConnectionConfig
 import json
+import pprint
 from kafka_producer import connection
 
 how_many = [0]
@@ -12,12 +13,17 @@ delayed_train_leaderboard = {}
 with open("..\\data_retrieval\\company_names.json") as company_names:
     company_lookup = json.load(company_names)
 
+# move both of these into one file ?? 
+
+with open("../secrets.json", "r") as file:
+    secrets = json.load(file)
+
 connection = ConnectionConfig(
-    bootstrap_servers="pkc-12576z.us-west2.gcp.confluent.cloud:9092",
+    bootstrap_servers=secrets.get("bootstrap_servers"),
     security_protocol="SASL_SSL",
     sasl_mechanism="PLAIN",
-    sasl_username="3NQBFYHQKWFAAYLV",
-    sasl_password="Zf0xVaHl1xYfkwVDmXcHJGxG1AqhuQRsqpac69R5tRdDd07BEdsg68WGONTpM8uo"
+    sasl_username=secrets.get("sasl_username"),
+    sasl_password=secrets.get("sasl_password")
 )
 
 
@@ -35,6 +41,7 @@ app = Application(
 
 def process_data(row, registered_journeys, delayed_train_leaderboard):
 
+
     train_entry = row[0]['body']
 
     train_entry["toc_id"] = company_lookup[train_entry["toc_id"]]
@@ -44,8 +51,8 @@ def process_data(row, registered_journeys, delayed_train_leaderboard):
 
         delayed_train_leaderboard = update_leaderboard(row, train_entry, delayed_train_leaderboard)
 
-    if delayed_train_leaderboard:
-        print(delayed_train_leaderboard)
+    # if delayed_train_leaderboard:
+    #     print(delayed_train_leaderboard)
 
 
     # Process data NOW returns the leaderboard to the top level. How do I update the global variable? Row 97
@@ -56,11 +63,21 @@ def process_data(row, registered_journeys, delayed_train_leaderboard):
 
 def update_leaderboard(row, train, leaderboard):
     
-    if train["variation_status"] == "LATE" and train["toc_id"] not in leaderboard:
-        leaderboard[train["toc_id"]] = 1
+    try: 
+        if train["variation_status"] == "LATE" and train["toc_id"] not in leaderboard:
+            leaderboard[train["toc_id"]] = 1
+            print(leaderboard)
+
+        
+        elif train["variation_status"] == "LATE" and train["toc_id"] in leaderboard:
+            leaderboard[train["toc_id"]] += 1
+            print(leaderboard)
     
-    elif train["variation_status"] == "LATE" and train["toc_id"] in leaderboard:
-        leaderboard[train["toc_id"]] += 1
+    except KeyError:
+        pass
+        # variation_status does not exist in the dictionary
+        
+
         
     
 

@@ -1,16 +1,21 @@
 from quixstreams import Application
-from quixstreams.kafka.configuration import ConnectionConfig
+from quixstreams.kafka import ConnectionConfig
 import pprint
+import json
+import logging
 
-config_file = 'api-key-cc.txt'
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+with open("../secrets.json", "r") as file:
+    secrets = json.load(file)
 
 connection = ConnectionConfig(
-    bootstrap_servers="pkc-12576z.us-west2.gcp.confluent.cloud:9092",
+    bootstrap_servers=secrets.get("bootstrap_servers"),
     security_protocol="SASL_SSL",
     sasl_mechanism="PLAIN",
-    sasl_username="3NQBFYHQKWFAAYLV",
-    sasl_password="Zf0xVaHl1xYfkwVDmXcHJGxG1AqhuQRsqpac69R5tRdDd07BEdsg68WGONTpM8uo"
+    sasl_username=secrets.get("sasl_username"),
+    sasl_password=secrets.get("sasl_password")
 )
 
 app = Application(broker_address=connection)
@@ -48,7 +53,7 @@ def produce_message_confluent(message):
             kafka_msg = messages_topic.serialize(key=None, value=message)
 
             # Produce chat message to the topic
-            # pprint.pp(f'Produce event with key="{kafka_msg.key}" value="{kafka_msg.value}"')
+            logger.info(f'Produce event with key="{kafka_msg.key}" value="{kafka_msg.value}"')
             producer.produce(
                 topic=messages_topic.name,
                 key=kafka_msg.key,
