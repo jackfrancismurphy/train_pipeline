@@ -10,14 +10,36 @@ from time import sleep
 import pprint
 import logging
 import threading
-
-# Third party
 import stomp
 
+# Local files
 from kafka_producer import produce_message_confluent
+
+registered_journeys = []
+
+delayed_train_leaderboard = {}
+
+allow_message = False
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+with open("..\\data_retrieval\\company_names.json") as company_names:
+    company_lookup = json.load(company_names)
+
+
+def update_leaderboard(train, leaderboard):
+
+
+    if train["toc_id"] not in leaderboard:
+        leaderboard[train["toc_id"]] = 1
+        print(leaderboard)
+
+
+    elif train["toc_id"] in leaderboard:
+        leaderboard[train["toc_id"]] += 1
+        print(leaderboard)
+
 
 
 class Listener(stomp.ConnectionListener):
@@ -33,19 +55,48 @@ class Listener(stomp.ConnectionListener):
 
         headers, message_raw = frame.headers, frame.body
         message = json.loads(message_raw)
-        
+
+        print(frame.body)
 
         if self.is_durable:
             # Acknowledging messages is important in client-individual mode
             self._mq.ack(id=headers["ack"],
                          subscription=headers["subscription"])
-
-        for journey in message:
-            logger.info(journey['body'])
-
         
 
-        produce_message_confluent(message)
+        # Start processing logic
+        
+        # Presume that a new message doesn't contain a new delay
+        allow_message = False
+
+        train_entry = message[0]['body']
+
+        try: 
+            if train_entry["train_id"] not in registered_journeys and train_entry["variation_status"] == "LATE":
+
+                logger.info("here!")
+
+                registered_journeys.append(train_entry["train_id"]) 
+
+                train_entry["toc_id"] = company_lookup[train_entry["toc_id"]]       
+
+                # this is also where the leaderboard is updated, alongside updating the allow_message variable
+                update_leaderboard(train_entry, delayed_train_leaderboard)
+
+                allow_message = True
+
+                logger.info(train_entry)
+
+        except KeyError:
+            # sometimes "variation status" doesn't exist
+            pass
+            
+
+        if allow_message == True:
+
+            logger.info(delayed_train_leaderboard)
+
+            produce_message_confluent(delayed_train_leaderboard)
 
 
     def on_error(self, frame):
@@ -53,6 +104,7 @@ class Listener(stomp.ConnectionListener):
 
     def on_disconnected(self):
         print('disconnected')
+
 
 
 if __name__ == "__main__":
@@ -76,7 +128,7 @@ if __name__ == "__main__":
     connection = stomp.Connection(
         [('publicdatafeeds.networkrail.co.uk', 61618)],
         keepalive=True,
-        heartbeats=(10000, 10000))
+        heartbeats=(100000, 100000))
     connection.set_listener('', Listener(connection))
 
     # Connect to feed
