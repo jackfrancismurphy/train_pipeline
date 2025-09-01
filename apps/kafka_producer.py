@@ -47,15 +47,14 @@ def main():
 
 def produce_message_confluent(message):
     with app.get_producer() as producer:
-        while message:
-            # Serialize chat message to send it to Kafka
-            # Use "chat_id" as a Kafka message key
-            kafka_msg = messages_topic.serialize(key=None, value=message)
+        # Serialize chat message to send it to Kafka
+        # Use "chat_id" as a Kafka message key
+        kafka_msg = messages_topic.serialize(key=None, value=message)
 
-            # Produce chat message to the topic
-            logger.info(f'Produce event with key="{kafka_msg.key}" value="{kafka_msg.value}"')
-            producer.produce(
-                topic=messages_topic.name,
-                key=kafka_msg.key,
-                value=kafka_msg.value,
+        # Produce chat message to the topic
+        logger.info(f'Produce event with key="{kafka_msg.key}" value="{kafka_msg.value}"')
+        producer.produce(
+            topic=messages_topic.name,
+            key=kafka_msg.key,
+            value=kafka_msg.value,
             )
