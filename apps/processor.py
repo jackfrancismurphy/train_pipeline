@@ -13,7 +13,7 @@ delayed_train_leaderboard = {}
 with open("..\\data_retrieval\\company_names.json") as company_names:
     company_lookup = json.load(company_names)
 
-# move both of these into one file ?? 
+# move both of these into one file ??
 
 with open("../secrets.json", "r") as file:
     secrets = json.load(file)
@@ -36,7 +36,7 @@ app = Application(
     auto_offset_reset="earliest"
 )
 
-# change the argument given to the lambda so that we already have access to 
+# change the argument given to the lambda so that we already have access to
 # body
 
 def process_data(row, registered_journeys, delayed_train_leaderboard):
@@ -56,36 +56,37 @@ def process_data(row, registered_journeys, delayed_train_leaderboard):
 
 
     # Process data NOW returns the leaderboard to the top level. How do I update the global variable? Row 97
+    # Does a train with the same train id do journeys later on? 
 
 
 
 
 
 def update_leaderboard(row, train, leaderboard):
-    
-    try: 
+
+    try:
         if train["variation_status"] == "LATE" and train["toc_id"] not in leaderboard:
             leaderboard[train["toc_id"]] = 1
             print(leaderboard)
 
-        
+
         elif train["variation_status"] == "LATE" and train["toc_id"] in leaderboard:
             leaderboard[train["toc_id"]] += 1
             print(leaderboard)
-    
+
     except KeyError:
         pass
         # variation_status does not exist in the dictionary
-        
 
-        
-    
+
+
+
 
 
     # This is the function which, for each new train registered as late,
     # adds or updates the delayed_train_leaderboard with each new
     # late train for each company
-    
+
 
 
 
