@@ -12,17 +12,22 @@ from time import sleep
 import pprint as pp
 import logging
 import threading
-
-# Third party
 import stomp
 from datetime import date
 
+# Local files
 from kafka_producer import produce_message_confluent
 from consuming_by_date import consume_one_message_confluent
 
 STATE_FILE = "..\\app_state.json"
 
 registered_journeys = []
+allow_message = False
+
+registered_journeys = []
+
+delayed_train_leaderboard = {}
+
 allow_message = False
 
 logging.basicConfig(level=logging.INFO)
@@ -95,7 +100,6 @@ def update_leaderboard(train, delayed_train_leaderboard):
 # elif first_run_bool == False:
 
 
-    
 
 
 
@@ -130,6 +134,7 @@ class Listener(stomp.ConnectionListener):
 
         headers, message_raw = frame.headers, frame.body
         message = json.loads(message_raw)
+
 
         if self.is_durable:
             # Acknowledging messages is important in client-individual mode
@@ -171,6 +176,7 @@ class Listener(stomp.ConnectionListener):
 
     def on_disconnected(self):
         print('disconnected')
+
 
 
 if __name__ == "__main__":
