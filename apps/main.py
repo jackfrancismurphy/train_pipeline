@@ -38,11 +38,12 @@ with open("..\\data_retrieval\\company_names.json") as company_names:
 
 most_recent_message = consume_one_message_confluent()
 
-if most_recent_message["date"] == str(date.today()):
-    delayed_train_leaderboard = consume_one_message_confluent()
-
-else:
+if most_recent_message == None or most_recent_message["date"] == str(date.today()):
     delayed_train_leaderboard = {"date": str(date.today()), "leaderboard": {}}
+
+
+elif most_recent_message["date"] == str(date.today()):
+    delayed_train_leaderboard = consume_one_message_confluent()
 
 
 # print(delayed_train_leaderboard)
@@ -175,7 +176,7 @@ class Listener(stomp.ConnectionListener):
         print('received an error {}'.format(frame.body))
 
     def on_disconnected(self):
-        print('disconnected')
+        print(f"disconnected at {date.datetime.now()}")
 
 
 
