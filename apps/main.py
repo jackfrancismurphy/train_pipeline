@@ -5,6 +5,7 @@
 
 # Ignoring argument functionality for now because Trust is all I need, but do I need --durable? Left in just in case
 
+from pathlib import Path
 import json
 import sys
 import os
@@ -13,13 +14,13 @@ import pprint as pp
 import logging
 import threading
 import stomp
-from datetime import date
+from datetime import date, datetime
 
 # Local files
 from kafka_producer import produce_message_confluent
 from consuming_by_date import consume_one_message_confluent
 
-STATE_FILE = "..\\app_state.json"
+STATE_FILE = Path("..") / "app_state.json"
 
 registered_journeys = []
 allow_message = False
@@ -33,7 +34,8 @@ allow_message = False
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-with open("..\\data_retrieval\\company_names.json") as company_names:
+file_path = Path("..") / "data_retrieval" / "company_names.json"
+with open(file_path) as company_names:
     company_lookup = json.load(company_names)
 
 most_recent_message = consume_one_message_confluent()
@@ -176,12 +178,14 @@ class Listener(stomp.ConnectionListener):
         print('received an error {}'.format(frame.body))
 
     def on_disconnected(self):
-        print(f"disconnected at {date.datetime.now()}")
+        print(f"disconnected at {datetime.now()}")
 
 
 
 if __name__ == "__main__":
-    with open("../secrets.json") as f:
+    
+    secrets_file = Path("..") / "secrets.json"
+    with open(secrets_file) as f:
         secrets = json.load(f)
 
     feed_username, feed_password = secrets["feed_username_&_password"]
