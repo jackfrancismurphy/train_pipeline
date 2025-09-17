@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch data from API
     async function fetchLatestData() {
         try {
-            const response = await fetch('http://34.169.114.91:8080/api/latest');
+            const response = await fetch('http://34.169.114.91:8080/api/latest'); // Google external IP address
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
