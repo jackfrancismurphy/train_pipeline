@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch data from API
     async function fetchLatestData() {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/latest');
+            const response = await fetch('http://10.138.0.5:8080/api/latest');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchLatestData();
 
         // Set up polling interval
-        setInterval(fetchLatestData, 5000);
+        setInterval(fetchLatestData, 8080);
     }
 
     // Start the polling when page loads
