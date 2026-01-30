@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch data from API
     async function fetchLatestData() {
         try {
-            const response = await fetch('https://trainpipelineapi.work.gd/api/latest'); // Google external IP address
+            const response = await fetch('https://trainpipelinendpoint.chickenkiller.com/api/latest'); // Google external IP address
+            // URL registered with: https://freedns.afraid.org/subdomain/
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
